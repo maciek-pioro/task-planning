@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from frozendict import frozendict
-
+import random
 
 def create_operator(name, pre, delete, add):
     whole_text = name
@@ -107,6 +107,7 @@ def create_predicate(name, conflict):
 def get_names_of_predicates(state):
     return {predicate['name'] for predicate in state}
 
+
 def regression(start, goal, seen_states=None):
     if seen_states is None:
         seen_states = set()
@@ -134,9 +135,116 @@ def regression(start, goal, seen_states=None):
             return  result + [operator['name']]
     return False
 
+
+def strips(start, goal):
+    goals_stack = []
+    result = []
+    current_state = start
+    goals_stack.append(goal)
+    for one_goal in goal:
+        if one_goal not in current_state:
+            goals_stack.append(one_goal)
+
+    while len(goals_stack) > 0:
+        stack_top = goals_stack.pop()
+        # print('goals_stack: ')
+        # print(goals_stack)
+        # print('current_state: ')
+        # print(current_state)
+        if isinstance(stack_top, str) and stack_top in PREDICATES.keys():
+            if check_if_predicate_true_in_curent_state(stack_top, current_state):
+                continue
+            operator = choose_operator(goals_stack, result, stack_top, current_state)
+            if operator is None:
+                return []
+            goals_stack.append(operator['name'])
+            goals_stack.append(operator['pre'])
+            continue
+        if isinstance(stack_top, list):
+            is_every_condition_met = True
+            for pre in stack_top:
+                if not check_if_predicate_true_in_curent_state(pre, current_state):
+                    is_every_condition_met = False
+                    break
+            if not is_every_condition_met:
+                goals_stack.append(stack_top)
+                for pre in stack_top:
+                    goals_stack.append(pre)
+            continue
+
+        if isinstance(stack_top, str) and stack_top in OPERATORS.keys():
+            operator = OPERATORS[stack_top]
+            do_operator_on_current_state(operator, current_state)
+            result.append(operator['name'])
+            # print('operator: ')
+            # print(operator['name'])
+    return result
+
+
+def choose_operator(goals_stack, result, stack_top, current_state):
+    candidates = []
+    for operator in OPERATORS.values():
+        if stack_top in operator['add'] and operator['name'] not in result and operator['name'] not in goals_stack:
+            candidates.append(operator)
+
+    # for candidate in candidates:
+    #     for pre in candidate['pre']:
+    #         for goal in goals_stack:
+    #             if pre in goal:
+    #                 candidates.remove(candidate)
+    #
+    # maximum = 0
+    # operator = []
+    # for op in candidates:
+    #     count = 0
+    #     for pre in op['pre']:
+    #         if check_if_predicate_true_in_curent_state(pre, current_state):
+    #             count += 1
+    #     if count > maximum:
+    #         maximum = count
+    #         operator = [op]
+    #     if count == maximum:
+    #         operator.append(op)
+
+    operator = candidates
+    if len(operator) == 1:
+        return operator[0]
+    if len(operator) == 0:
+        return None
+    if len(operator) > 1:
+        return operator[random.randint(0, len(operator)-1)]
+
+
+
+def do_operator_on_current_state(operator, current_state):
+    for pre in operator['delete']:
+        current_state.remove(pre)
+    for add in operator['add']:
+        current_state.append(add)
+
+
+def check_if_predicate_true_in_curent_state(predicate,current_state):
+    for axiom in AXIOMS.values():
+        if axiom['name'] in current_state:
+            continue
+        is_state_from_axioms = False
+        for conflict in axiom['conflict']:
+            if conflict in current_state:
+                is_state_from_axioms = True
+                break
+        if not is_state_from_axioms:
+            current_state.add(axiom['name'])
+    if predicate in current_state:
+        return True
+    return False
+
+
 BLOCKS = ['A', 'B', 'C']
 
 VARIABLES = ['x', 'y']
+
+AXIOMS = {**create_predicate('CLEAR(x)', conflict=['ON(y,x)']),
+          **create_predicate('ARMEMPTY', conflict=['HOLDING(x)'])}
 
 PREDICATES = {**create_predicate('ON(x,y)', conflict=['ONTABLE(x)', 'HOLDING(x)', 'HOLDING(y)']) ,
     **create_predicate('ONTABLE(x)', conflict=['ON(x,y)', 'HOLDING(x)']) ,
@@ -154,4 +262,18 @@ OPERATORS = {**create_operator('PICKUP(x)', pre=['CLEAR(x)', 'ONTABLE(x)', 'ARME
 result = regression(start={'ON(C,B)', 'ON(B,A)', 'ONTABLE(A)', 'CLEAR(C)', 'ARMEMPTY'}, 
                     goal={'ON(A,B)', 'ON(B,C)', 'ONTABLE(C)', 'CLEAR(A)', 'ARMEMPTY'})
 print(result)
+result = []
+while len(result) == 0:
+    result = strips(start=['ON(C,B)', 'ON(B,A)', 'ONTABLE(A)', 'CLEAR(C)', 'ARMEMPTY'],
+                    goal=['ON(A,B)', 'ON(B,C)', 'ONTABLE(C)', 'CLEAR(A)', 'ARMEMPTY'])
+print(result)
+
+# print(OPERATORS)
+# print(PREDICATES)
+
+# for res in PREDICATES.values():
+#     print(res['conflict'])
+# for res in OPERATORS:
+#     print(res)
+
 
