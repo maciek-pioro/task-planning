@@ -107,6 +107,40 @@ def create_predicate(name, conflict):
 def get_names_of_predicates(state):
     return {predicate['name'] for predicate in state}
 
+def progressive(start, goal, seen_states = None):
+
+    if seen_states is None:
+        seen_states = set()
+
+    if str(start) in seen_states:
+        return False
+
+    seen_states.add(str(start))
+
+    for predicate in goal:
+        for conflict in PREDICATES[predicate]['conflict']:
+            if conflict in goal:
+                return False
+
+    if (goal & start) == goal:
+        return []
+
+    admissible_operators = []
+    for operator_name, operator in OPERATORS.items():
+        pre = set(operator['pre'])
+        if (pre & start) == pre:
+            admissible_operators += [operator]
+
+    #TODO: Heurystyka
+    for operator in admissible_operators:
+        result = progressive((start | set(operator['add'])) - set(operator['delete']), goal, seen_states)
+        if result == False:
+            continue
+        else: 
+            return [operator['name']] + result
+
+    return False
+
 def regression(start, goal, seen_states=None):
     if seen_states is None:
         seen_states = set()
@@ -150,8 +184,12 @@ OPERATORS = {**create_operator('PICKUP(x)', pre=['CLEAR(x)', 'ONTABLE(x)', 'ARME
     **create_operator('UNSTACK(x,y)', pre=['ON(x,y)', 'CLEAR(x)', 'ARMEMPTY'], delete=[
                     'ON(x,y)', 'ARMEMPTY'], add=['HOLDING(x)', 'CLEAR(y)'])}
 
-
+print("Regression")
 result = regression(start={'ON(C,B)', 'ON(B,A)', 'ONTABLE(A)', 'CLEAR(C)', 'ARMEMPTY'}, 
                     goal={'ON(A,B)', 'ON(B,C)', 'ONTABLE(C)', 'CLEAR(A)', 'ARMEMPTY'})
 print(result)
 
+print("Progressive")
+result2 = progressive(start={'ON(C,B)', 'ON(B,A)', 'ONTABLE(A)', 'CLEAR(C)', 'ARMEMPTY'}, 
+                    goal={'ON(A,B)', 'ON(B,C)', 'ONTABLE(C)', 'CLEAR(A)', 'ARMEMPTY'})
+print(result2)
