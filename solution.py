@@ -3,6 +3,7 @@
 from frozendict import frozendict
 import random
 import time
+import copy
 
 def create_operator(name, pre, delete, add):
     whole_text = name
@@ -172,10 +173,11 @@ def regression(start, goal, seen_states=None):
     return False
 
 
-def strips(start, goal):
+def strips(start_, goal_):
     goals_stack = []
     result = []
-    current_state = start
+    current_state = copy.deepcopy(start_)
+    goal = copy.deepcopy(goal_)
     goals_stack.append(goal)
     for one_goal in goal:
         if one_goal not in current_state:
