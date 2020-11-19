@@ -4,6 +4,7 @@ from frozendict import frozendict
 import random
 import time
 import copy
+import itertools
 
 def create_operator(name, pre, delete, add):
     whole_text = name
@@ -370,13 +371,28 @@ def compute_task(start,goal):
     print("Time: {0:02f}s".format(end - begin))
     print("Result length: " + str(len(result)))
 
-    print("Strips:")
+    print("Strips rekurencja:")
     result = []
     s = list(start)
     g = list(goal)
     begin = time.perf_counter()
 
     result = strips_rek(s, g, [], [], [], True)
+    end = time.perf_counter()
+    print(result)
+    print("Time: {0:02f}s".format(end - begin))
+    print("Result length: " + str(len(result)))
+
+    print("Strips losowe wybieranie operatora:")
+    result = []
+    s = list(start)
+    g = list(goal)
+    begin = time.perf_counter()
+    result = []
+    counter = 0
+    while len(result) == 0 and counter < 200000:
+        result = strips(s, g)
+        counter += 1
     end = time.perf_counter()
     print(result)
     print("Time: {0:02f}s".format(end - begin))
