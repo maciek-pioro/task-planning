@@ -2,6 +2,7 @@
 
 from frozendict import frozendict
 import random
+import time
 
 def create_operator(name, pre, delete, add):
     whole_text = name
@@ -273,6 +274,39 @@ def check_if_predicate_true_in_curent_state(predicate,current_state):
         return True
     return False
 
+def compute_task(start,goal):
+    print("Start:")
+    print(start)
+    print("Goal:")
+    print(goal)
+
+    print("Regression:")
+    begin = time.perf_counter()
+    result = regression(start, goal)
+    end = time.perf_counter()
+    print(result)
+    print("Time: {0:02f}s".format(end - begin))
+    print("Result length: " + str(len(result)))
+
+    print("Strips:")
+    result = []
+    s = list(start)
+    g = list(goal)
+    begin = time.perf_counter()
+    while len(result) == 0:
+        result = strips(s, g)
+    end = time.perf_counter()
+    print(result)
+    print("Time: {0:02f}s".format(end - begin))
+    print("Result length: " + str(len(result)))
+
+    print("Progressive:")
+    begin = time.perf_counter()
+    result = progressive(start, goal)
+    end = time.perf_counter()
+    print(result)
+    print("Time: {0:02f}s".format(end - begin))
+    print("Result length: " + str(len(result)))
 
 BLOCKS = ['A', 'B', 'C']
 
@@ -293,17 +327,5 @@ OPERATORS = {**create_operator('PICKUP(x)', pre=['CLEAR(x)', 'ONTABLE(x)', 'ARME
     **create_operator('UNSTACK(x,y)', pre=['ON(x,y)', 'CLEAR(x)', 'ARMEMPTY'], delete=[
                     'ON(x,y)', 'ARMEMPTY'], add=['HOLDING(x)', 'CLEAR(y)'])}
 
-print("Regression")
-result = regression(start={'ON(C,B)', 'ON(B,A)', 'ONTABLE(A)', 'CLEAR(C)', 'ARMEMPTY'}, 
-                    goal={'ON(A,B)', 'ON(B,C)', 'ONTABLE(C)', 'CLEAR(A)', 'ARMEMPTY'})
-print(result)
-result = []
-while len(result) == 0:
-    result = strips(start=['ON(C,B)', 'ON(B,A)', 'ONTABLE(A)', 'CLEAR(C)', 'ARMEMPTY'],
-                    goal=['ON(A,B)', 'ON(B,C)', 'ONTABLE(C)', 'CLEAR(A)', 'ARMEMPTY'])
-print(result)
-
-print("Progressive")
-result2 = progressive(start={'ON(C,B)', 'ON(B,A)', 'ONTABLE(A)', 'CLEAR(C)', 'ARMEMPTY'}, 
-                    goal={'ON(A,B)', 'ON(B,C)', 'ONTABLE(C)', 'CLEAR(A)', 'ARMEMPTY'})
-print(result2)
+compute_task(start={'ON(C,B)', 'ON(B,A)', 'ONTABLE(A)', 'CLEAR(C)', 'ARMEMPTY'}, 
+            goal={'ON(A,B)', 'ON(B,C)', 'ONTABLE(C)', 'CLEAR(A)', 'ARMEMPTY'})
