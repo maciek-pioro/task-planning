@@ -1,0 +1,35 @@
+[
+	{
+		"in": ["ON(B,A)", "ONTABLE(A)", "CLEAR(B)", "ARMEMPTY"],
+		"out": ["ON(A,B)", "ONTABLE(B)", "CLEAR(A)", "ARMEMPTY"]	
+	},
+	{
+		"in": ["ON(C,B)", "ON(B,A)", "ONTABLE(A)", "CLEAR(C)", "ARMEMPTY"],
+		"out": ["ON(A,B)", "ON(B,C)", "ONTABLE(C)", "CLEAR(A)", "ARMEMPTY"]
+	},
+	{
+		"in": ["ON(D,C)","ON(C,B)", "ON(B,A)", "ONTABLE(A)", "CLEAR(D)", "ARMEMPTY"],
+		"out": ["ON(A,B)", "ON(B,C)","ON(C,D)", "ONTABLE(D)", "CLEAR(A)", "ARMEMPTY"]
+	},
+
+	{
+		"in": ["ONTABLE(A)", "ONTABLE(B)", "CLEAR(A)", "CLEAR(B)", "ARMEMPTY"],
+		"out": ["ON(A,B)", "ONTABLE(B)", "CLEAR(A)", "ARMEMPTY"]	
+	},
+	{
+		"in": ["ONTABLE(A)", "ONTABLE(B)", "ONTABLE(C)", "CLEAR(A)", "CLEAR(B)","CLEAR(C)", "ARMEMPTY"],
+		"out": ["ON(A,B)", "ON(B,C)", "ONTABLE(C)", "CLEAR(A)", "ARMEMPTY"]
+	},
+	
+
+
+
+	{
+		"in": ["ONTABLE(A)", "ONTABLE(B)", "ONTABLE(C)", "CLEAR(A)", "CLEAR(B)","CLEAR(C)", "ARMEMPTY"],
+		"out": ["ON(A,B)", "ONTABLE(B)", "ONTABLE(C)", "CLEAR(A)", "ARMEMPTY"]
+	},
+	{
+		"in": ["ONTABLE(A)", "ONTABLE(B)", "ONTABLE(C)", "ONTABLE(D)", "CLEAR(A)", "CLEAR(B)","CLEAR(C)", "CLEAR(D)", "ARMEMPTY"],
+		"out": ["ON(A,B)","ON(C,D)", "ONTABLE(D)", "CLEAR(A)", "ONTABLE(B)", "CLEAR(C)", "ARMEMPTY"]
+	}
+]
